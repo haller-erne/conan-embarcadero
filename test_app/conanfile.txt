@@ -1,0 +1,9 @@
+[requires]
+test_lib/0.1
+
+[options]
+test_lib/*:shared=True
+
+[generators]
+CMakeDeps
+CMakeToolchain

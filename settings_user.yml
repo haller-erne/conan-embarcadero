@@ -1,0 +1,5 @@
+# settings_user.yml
+compiler:
+    bcc32c:
+        version: ["7.30"]
+        threads: [null, "posix"]
