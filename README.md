@@ -1,6 +1,20 @@
-# Second iteration
+# Using conan2 with Embarcadero C++Builder
+
+Although Embarcadero ships its own package manager [GetIt](https://getitnow.embarcadero.com/), this is not an open infrastructure and tightly coupled to the IDE.
+
+As [Embarcadero C++ Builder](https://www.embarcadero.com/de/products/cbuilder) finally supports CMake (to some extent), here is an experiment to make C++ Builder work with [Conan2](https://conan.io/). The main target of this repo is not to actually use the large ecosystem of C++ packages provided in the [ConanCenter public package repository](https://conan.io/center) (as the Embarcadero compiler is simply too non-standard-C++ conformat to compile almost any current C++ package), but to use [Conan2](https://conan.io/) to internally manage packages and dependencies (using the local cache or the self-hosted [JFrog Artifactory community edition for C++](https://conan.io/downloads)).
 
 ## Environment setup
+
+To make conan2 work with C++Builder, the CMake and Conan environments must be manually modified.
+
+This needs the following steps (shown in detail below):
+
+1. Setup the CMake environment according to Embarcaderos description in the DocWiki (see [Using CMake with C++ Builder](https://docwiki.embarcadero.com/RADStudio/Athens/en/Using_CMake_with_C%2B%2B_Builder))
+2. Define and register a custom compiler configuration for Conan2 (see [here](#define-a-conan-user-setting-for-embarcadero-bcc32c))
+3. Add a conan profile for the Embarcadero C++ compiler (see [here](#add-a-conan-profile-for-embarcadero-bcc32c))
+4. Register the Ninja generator for conan (see [here](#register-the-ninja-generator-for-conan))
+
 
 ### Define a conan user setting for Embarcadero bcc32c
 
@@ -16,14 +30,15 @@ compiler:
         threads: [null, "posix"]
 ```
 
-Then istall this as a custom user config:
+Then install this as a custom user config:
 
 ``` cmd
-:: install the the (local) settings_user.yml to the conan directory
+rem Install the the (local) settings_user.yml to the conan directory
 conan config install settings_user.yml
 ```
 
-This should show something like `Copying file settings_user.yml to C:\Users\Ahmad.Abbasian.A\.conan2\.`
+This should show something like `Copying file settings_user.yml to C:\Users\<username>\.conan2\.`
+
 
 ### Add a conan profile for Embarcadero bcc32c
 
@@ -44,36 +59,80 @@ Install the profile by copying to the users conan profile folder:
 copy bcc32c.conanprofile %homedrive%%homepath%\.conan2\profiles\bcc32c
 ```
 
-Dann kann man die lib  bauen:
-
-	cd test-lib
-	conan build .  --profile=bcc32c
-
 ### Register the ninja generator for conan
 
 To check the current configuration:
 
-	conan config show tools.cmake.cmaketoolchain:generator
+``` cmd
+conan config show tools.cmake.cmaketoolchain:generator
+```
 
 This should report `ninja`.
 
 If not, then edit the global conan configuration: 
 
-	notepad c:\users\<username>\.conan2\global.conf
+``` cmd
+notepad c:\users\<username>\.conan2\global.conf
+```
 
 Then add/change a line as follows:
 
-	tools.cmake.cmaketoolchain:generator = Ninja
+``` cmd
+tools.cmake.cmaketoolchain:generator = Ninja
+```
 
-## Library build
+## Building the library
 
-### conanfile.py and conanfile.txt
+### Building and installing
 
+Then build the library by:
 
+``` cmd
+cd test-lib
+./build-lib.cmd
+```
 
-### building
+This basically runs the following commands in a sequence:
 
-### installing
+- Install required dependencies for the build
 
+	conan . install --profile=bcc32c
 
+- Actually build the library
+
+	conan . build --profile=bcc32c
+
+- Install the generated library into the local cache
+
+	conan . create --profile=bcc32c
+
+### Checking
+
+To check, if the library was correctly installed into the local cache, run the following command:
+
+``` cmd
+	::list all locally installed packages
+	conan list *
+```
+
+## Building the application / consuming the library
+
+To build the application, do:
+
+``` cmd
+cd test-app
+./build-app.cmd
+```
+
+This basically runs the following commands in a sequence:
+
+- Install required dependencies for the build
+
+	conan install ./conanfile.txt --output-folder build/Debug --profile=bcc32c
+
+- Actually build the library
+
+	conan build . --profile=bcc32c
+
+The build executable can be found in `build/debug/src`
 

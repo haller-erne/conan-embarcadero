@@ -2,7 +2,7 @@
 :: install possible dependencies
 conan install ./conanfile.txt --output-folder build/Debug --profile=bcc32c
 :: build using conan
-::conan build . --profile=bcc32c 
+conan build . --profile=bcc32c 
 :: test the package
 ::conan test
 
