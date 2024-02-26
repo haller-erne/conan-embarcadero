@@ -2,11 +2,14 @@
 :: remove previous version from cache
 ::conan remove test_lib/0.1
 
+:: install dependencies (if any)
+conan install . --profile=bcc32c 
+
 :: build using conan
 conan build . --profile=bcc32c 
 
-:: install everything into local cache
-conan install . --profile=bcc32c 
+:: package the library and install it into local cache
+conan create . --profile=bcc32c
 
 :: test the package
 ::conan test
