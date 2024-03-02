@@ -4,6 +4,11 @@ Although Embarcadero ships its own package manager [GetIt](https://getitnow.emba
 
 As [Embarcadero C++ Builder](https://www.embarcadero.com/de/products/cbuilder) finally supports CMake (to some extent), here is an experiment to make C++ Builder work with [Conan2](https://conan.io/). The main target of this repo is not to actually use the large ecosystem of C++ packages provided in the [ConanCenter public package repository](https://conan.io/center) (as the Embarcadero compiler is simply too non-standard-C++ conformat to compile almost any current C++ package), but to use [Conan2](https://conan.io/) to internally manage packages and dependencies (using the local cache or the self-hosted [JFrog Artifactory community edition for C++](https://conan.io/downloads)).
 
+Some additional notes and noteworthy info:
+
+- Using conan will allow us to create SBOMs using the [conan sbom:cyclonedx](https://github.com/conan-io/conan-extensions/blob/main/extensions/commands/sbom/README.md) extension
+- [@code-kungfu](https://github.com/conan-io/conan/issues/13447#issuecomment-1964560805) is working on a Conan2 extension to integrate C++Builder **and** Delphi using `MSBuild`...
+
 ## Environment setup
 
 To make conan2 work with C++Builder, the CMake and Conan environments must be manually modified.
